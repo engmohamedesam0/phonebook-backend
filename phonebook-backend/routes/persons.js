@@ -43,7 +43,7 @@ router.post('/', (req, res, next) => {
       Person.findByIdAndUpdate(
         existing._id,
         { number: body.number },
-        { new: true }
+        { new: true, runValidators: true, context: 'query' }
       ).then(updated => {
         res.json(updated)
       }).catch(err => next(err))
@@ -70,7 +70,7 @@ router.put('/:id', (req, res, next) => {
   Person.findByIdAndUpdate(
     req.params.id,
     { number: body.number },
-    { new: true }
+    { new: true, runValidators: true, context: 'query' }
   ).then(updated => {
     if (updated) {
       res.json(updated)
