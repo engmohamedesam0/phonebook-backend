@@ -1,12 +1,16 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const personsRouter = require('./routes/persons')
+const errorHandler = require('./middleware/errorHandler')
+
 require('dotenv').config()
+
 const app = express()
 
 app.use(express.json())
 
 const url = process.env.MONGODB_URI
+
 mongoose.connect(url).then(() => {
   console.log('connected to MongoDB')
 }).catch(err => {
@@ -23,20 +27,6 @@ app.get('/info', (req, res, next) => {
     `)
   }).catch(err => next(err))
 })
-
-const errorHandler = (error, req, res, next) => {
-  console.error(error.message)
-
-  if (error.name === 'CastError') {
-    return res.status(400).json({ error: 'malformatted id' })
-  }
-
-  if (error.name === 'ValidationError') {
-    return res.status(400).json({ error: error.message })
-  }
-
-  next(error)
-}
 
 app.use(errorHandler)
 
