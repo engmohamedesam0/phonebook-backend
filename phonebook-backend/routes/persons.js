@@ -1,29 +1,33 @@
 const router = require('express').Router()
 const Person = require('../models/person')
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   Person.find({}).then(persons => {
     res.json(persons)
-  })
+  }).catch(err => next(err))
 })
 
-router.get('/:id', (req, res) => {
-  Person.findById(req.params.id).then(person => {
-    if (person) {
-      res.json(person)
-    } else {
-      res.status(404).json({ error: 'person not found' })
-    }
-  })
+router.get('/:id', (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).json({ error: 'person not found' })
+      }
+    })
+    .catch(err => next(err))
 })
 
-router.delete('/:id', (req, res) => {
-  Person.findByIdAndDelete(req.params.id).then(() => {
-    res.status(204).end()
-  })
+router.delete('/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(err => next(err))
 })
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
   const body = req.body
 
   if (!body.name) {
@@ -36,18 +40,44 @@ router.post('/', (req, res) => {
 
   Person.findOne({ name: body.name }).then(existing => {
     if (existing) {
-      return res.status(400).json({ error: 'name must be unique' })
+      Person.findByIdAndUpdate(
+        existing._id,
+        { number: body.number },
+        { new: true }
+      ).then(updated => {
+        res.json(updated)
+      }).catch(err => next(err))
+    } else {
+      const person = new Person({
+        name: body.name,
+        number: body.number,
+      })
+
+      person.save().then(saved => {
+        res.json(saved)
+      }).catch(err => next(err))
     }
+  }).catch(err => next(err))
+})
 
-    const person = new Person({
-      name: body.name,
-      number: body.number,
-    })
+router.put('/:id', (req, res, next) => {
+  const body = req.body
 
-    person.save().then(saved => {
-      res.json(saved)
-    })
-  })
+  if (!body.number) {
+    return res.status(400).json({ error: 'number is missing' })
+  }
+
+  Person.findByIdAndUpdate(
+    req.params.id,
+    { number: body.number },
+    { new: true }
+  ).then(updated => {
+    if (updated) {
+      res.json(updated)
+    } else {
+      res.status(404).json({ error: 'person not found' })
+    }
+  }).catch(err => next(err))
 })
 
 module.exports = router

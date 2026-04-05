@@ -33,3 +33,24 @@ Content-Type: application/json
   "name": "Ada Lovelace",
   "number": "010-12345678"
 }
+
+
+###
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Ab",
+  "number": "040-1234556"
+}
+
+###
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Mohamed",
+  "number": "12345"
+}
